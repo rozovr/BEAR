@@ -8,14 +8,14 @@ import sys, csv, StringIO, random, decimal, argparse
 
 
 parser = argparse.ArgumentParser(description='Generate uniform-length single or paired-end metagenomic reads.')
-parser.add_argument('-r', metavar='<reference_fasta>', dest="ref", help="Multi-FASTA file containing genomic sequences from which reads will be sampled.")
-parser.add_argument('-a', metavar='<abundance_file>', dest="abund", help="Tab-delimited abundance file with an abundance value for each corre- sponding genome sequence in <reference fasta>")
-parser.add_argument('-o', metavar='<output_file>', dest="output", help="Name for output file containing simulated uniform-length reads")
-parser.add_argument('-t', metavar='<total_reads>', type=int, dest="total", help="The total number of reads to sample from all genomes")
-parser.add_argument('-l', metavar='<longest_read>', type=int, dest="length", help="The length, in bp, of the longest possible read to simulate")
-parser.add_argument('-i', metavar='<insert_mean_length>', type=int, dest="insert", default="0", help="Average length of insert for paired-end reads.")
-parser.add_argument('-s', metavar='<insert_stddev>', type=int, dest="stddev", default="0", help="Standard deviation of insert length for paired-end reads" )
-parser.add_argument('-d', metavar='<direction_switch>', action='store_true', dest="direction", help="Use this switch to generate reads in both forward and reverse orientations" )
+parser.add_argument('-r', dest="ref", help="Multi-FASTA file containing genomic sequences from which reads will be sampled.")
+parser.add_argument('-a', dest="abund", help="Tab-delimited abundance file with an abundance value for each corre- sponding genome sequence in <reference fasta>")
+parser.add_argument('-o', dest="output", help="Name for output file containing simulated uniform-length reads")
+parser.add_argument('-t', type=int, dest="total", help="The total number of reads to sample from all genomes")
+parser.add_argument('-l', type=int, dest="length", help="The length, in bp, of the longest possible read to simulate")
+parser.add_argument('-i', type=int, dest="insert", default="0", help="Average length of insert for paired-end reads.")
+parser.add_argument('-s', type=int, dest="stddev", default="0", help="Standard deviation of insert length for paired-end reads" )
+parser.add_argument('-d', action='store_true', dest="direction", help="Use this switch to generate reads in both forward and reverse orientations" )
 args = parser.parse_args()
  
 
@@ -28,6 +28,7 @@ f2 = open(args.abund);
 total_reads = args.total
 
 max_read_length = args.length
+args.direction = True
 
 insert_avg = args.insert
 insert_stdev = args.stddev
@@ -51,14 +52,16 @@ for row in div_file:
 	species.append(row[0][1:])
 	diversity.append(decimal.Decimal(row[1]))
 
+# print "species ", species, len(species)
 
 for i in SeqIO.parse(f1, 'fasta') :
 	genome_num=0	
-	while(not(species[genome_num] in i.description)) :
+	while(genome_num < len(species)-1 and not(species[genome_num][:-2] in i.description)) :
 		genome_num+=1
-	if(species[genome_num] in i.description) :
+		# print genome_num, species[genome_num], i.description
+	if(species[genome_num][:-2] in i.description) :
+		print genome_num, species[genome_num]
 		coverage=max(1, int((decimal.Decimal(diversity[genome_num])*total_reads)))
-		
 		limit=len(i.seq)
 		for j in range(0, coverage) :
                 	rand = random.random()
