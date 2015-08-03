@@ -69,7 +69,7 @@ for i in SeqIO.parse(f1, 'fasta') :
                 	numLen = len(lengths)-1
 			
 			if( (insert_avg != 0) & (insert_stdev != 0)):
-				cur_insert = int(random.gauss(insert_avg, insert_stddev))
+				cur_insert = int(random.gauss(insert_avg, insert_stdev))
 				if(limit > (max_read_length * 2 + cur_insert)):
 					start1 = random.randint(0, limit-(2*max_read_length + cur_insert))
 					end1 = start1 + max_read_length
