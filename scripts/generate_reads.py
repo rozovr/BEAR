@@ -3,7 +3,7 @@
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
-from numpy import random as np.random
+from numpy import random as npr
 import sys, csv, StringIO, random, decimal, argparse
 
 complements = {'A':'T', 'C':'G', 'G':'C', 'T':'A'}
@@ -59,7 +59,7 @@ for row in div_file:
 	diversity.append(decimal.Decimal(row[1]))
 
 # print "species ", species, len(species)
-rand_vec = np.random(1000000)
+rand_vec = npr.random(1000000)
 ind = 0
 
 for i in SeqIO.parse(f1, 'fasta') :
