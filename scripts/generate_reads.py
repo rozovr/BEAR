@@ -3,7 +3,13 @@
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
+from numpy import random as np.random
 import sys, csv, StringIO, random, decimal, argparse
+
+complements = {'A':'T', 'C':'G', 'G':'C', 'T':'A'}
+def rc_seq(dna):
+    rev = reversed(dna)
+    return "".join([complements[i] for i in rev])
 
 
 
@@ -15,7 +21,7 @@ parser.add_argument('-t', type=int, dest="total", help="The total number of read
 parser.add_argument('-l', type=int, dest="length", help="The length, in bp, of the longest possible read to simulate")
 parser.add_argument('-i', type=int, dest="insert", default="0", help="Average length of insert for paired-end reads.")
 parser.add_argument('-s', type=int, dest="stddev", default="0", help="Standard deviation of insert length for paired-end reads" )
-parser.add_argument('-d', action='store_true', dest="direction", help="Use this switch to generate reads in both forward and reverse orientations" )
+# parser.add_argument('-d', action='store_true', dest="direction", help="Use this switch to generate reads in both forward and reverse orientations" )
 args = parser.parse_args()
  
 
@@ -53,18 +59,18 @@ for row in div_file:
 	diversity.append(decimal.Decimal(row[1]))
 
 # print "species ", species, len(species)
+rand_vec = np.random(1000000)
+ind = 0
 
 for i in SeqIO.parse(f1, 'fasta') :
 	genome_num=0	
 	while(genome_num < len(species)-1 and not(species[genome_num][:-2] in i.description)) :
 		genome_num+=1
-		# print genome_num, species[genome_num], i.description
 	if(species[genome_num][:-2] in i.description) :
-		print genome_num, species[genome_num]
 		coverage=max(1, int((decimal.Decimal(diversity[genome_num])*total_reads)))
 		limit=len(i.seq)
 		for j in range(0, coverage) :
-                	rand = random.random()
+                	# rand = random.random()
                 	rand_length = 0
                 	numLen = len(lengths)-1
 			
@@ -81,9 +87,11 @@ for i in SeqIO.parse(f1, 'fasta') :
 					start2 = 0
 					end2 = limit
 				read1 = i.seq[start1:end1]
-				read2 = i.seq[end2:start2:-1]
+				read2 = rc_seq(i.seq[start2:end2])
 				if(args.direction):
-					check = random.random()
+					# check = random.random()
+					check = rand_vec[ind % 1000000]
+					ind+=1
 					if(check < 0.5): #forward orientation
 						f4.write(">%s\n" % i.description)
 						f4.write("%s\n" % read1)
