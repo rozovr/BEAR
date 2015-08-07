@@ -6,7 +6,7 @@ from Bio.SeqRecord import SeqRecord
 from numpy import random as npr
 import sys, csv, StringIO, random, decimal, argparse
 
-complements = {'A':'T', 'C':'G', 'G':'C', 'T':'A'}
+complements = {'A':'T', 'C':'G', 'G':'C', 'T':'A',}
 def rc_seq(dna):
     rev = reversed(dna)
     return "".join([complements[i] for i in rev])
@@ -69,6 +69,13 @@ for i in SeqIO.parse(f1, 'fasta') :
 	if(species[genome_num][:-2] in i.description) :
 		coverage=max(1, int((decimal.Decimal(diversity[genome_num])*total_reads)))
 		limit=len(i.seq)
+		# delete foreign characters
+		seq = []
+		for c in i.seq:
+			if c in 'ACGT':
+				seq.append(c)
+		seq =''.join(seq)
+
 		for j in range(0, coverage) :
                 	# rand = random.random()
                 	rand_length = 0
@@ -86,8 +93,8 @@ for i in SeqIO.parse(f1, 'fasta') :
 					end1 = limit
 					start2 = 0
 					end2 = limit
-				read1 = i.seq[start1:end1]
-				read2 = rc_seq(i.seq[start2:end2])
+				read1 = seq[start1:end1]
+				read2 = rc_seq(seq[start2:end2])
 				if(args.direction):
 					# check = random.random()
 					check = rand_vec[ind % 1000000]
