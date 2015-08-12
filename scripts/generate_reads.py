@@ -126,9 +126,9 @@ for i in SeqIO.parse(f1, 'fasta') :
                                 		f5.write("%s\n" % read2)
 					else: #reverse orientation
 						f4.write(">%s\n" % i.description)
-						f4.write("%s\n" % read1[::-1])
+						f4.write("%s\n" % rc_seq(read1))
 						f5.write(">%s\n" % i.description)
-						f5.write("%s\n" % read2[::-1])
+						f5.write("%s\n" % rc_seq(read2))
 			else:
 				if(limit > max_read_length) :	
 					start=random.randint(0, limit-max_read_length)
