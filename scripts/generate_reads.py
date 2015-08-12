@@ -11,7 +11,22 @@ def rc_seq(dna):
     rev = reversed(dna)
     return "".join([complements[i] for i in rev])
 
+def get_mod_seq(dna, start, end, limit):
+	if start >= limit and end >= limit:
+		return dna[(start%limit):(end%limit)]
+	elif end >= limit:
+		return dna[start:limit] + dna[:(end%limit)]
+	else:
+		return dna[start:end]
 
+def test_get_mod_seq():
+	seq = "AAAAABBBBBCCCCC"
+	print seq, len(seq)
+	print get_mod_seq(seq,5,10,len(seq))
+	print get_mod_seq(seq,20,25,len(seq))
+	print get_mod_seq(seq,21,26,len(seq))
+
+# test_get_mod_seq()
 
 parser = argparse.ArgumentParser(description='Generate uniform-length single or paired-end metagenomic reads.')
 parser.add_argument('-r', dest="ref", help="Multi-FASTA file containing genomic sequences from which reads will be sampled.")
@@ -68,14 +83,14 @@ for i in SeqIO.parse(f1, 'fasta') :
 		genome_num+=1
 	if(species[genome_num][:-2] in i.description) :
 		coverage=max(1, int((decimal.Decimal(diversity[genome_num])*total_reads)))
-		limit=len(i.seq)
+		# limit=len(i.seq)
 		# delete foreign characters
 		seq = []
 		for c in i.seq:
 			if c in 'ACGT':
 				seq.append(c)
 		seq =''.join(seq)
-
+		limit = len(seq)
 		for j in range(0, coverage) :
                 	# rand = random.random()
                 	rand_length = 0
@@ -84,7 +99,9 @@ for i in SeqIO.parse(f1, 'fasta') :
 			if( (insert_avg != 0) & (insert_stdev != 0)):
 				cur_insert = int(random.gauss(insert_avg, insert_stdev))
 				if(limit > (max_read_length * 2 + cur_insert)):
-					start1 = random.randint(0, limit-(2*max_read_length + cur_insert))
+					# start1 = random.randint(0, limit-(2*max_read_length + cur_insert))
+					# assumes cyclic sequence - keep orig treatment if not
+					start1 = random.randint(0,limit-1) # allows pair to overlap cyc at every position
 					end1 = start1 + max_read_length
 					start2 = end1 + cur_insert
 					end2 = start2 + max_read_length
@@ -93,8 +110,11 @@ for i in SeqIO.parse(f1, 'fasta') :
 					end1 = limit
 					start2 = 0
 					end2 = limit
-				read1 = seq[start1:end1]
-				read2 = rc_seq(seq[start2:end2])
+
+
+				read1 = get_mod_seq(seq,start1,end1,limit)
+				read2 = rc_seq(get_mod_seq(seq,start2,end2,limit))
+
 				if(args.direction):
 					# check = random.random()
 					check = rand_vec[ind % 1000000]
